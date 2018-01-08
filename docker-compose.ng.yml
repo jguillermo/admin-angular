@@ -1,0 +1,7 @@
+version: '2'
+services:
+  node:
+    extends:
+      file: docker-compose.tasks.yml
+      service: node
+    working_dir: /usr/src/${ProjectName}
