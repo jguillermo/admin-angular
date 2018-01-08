@@ -4,6 +4,8 @@
 
 ProjectName="MYAPP"
 
+FILE_PROJECT="projectname"
+
 CK='\u2714'
 ER='\u274c'
 
@@ -22,19 +24,29 @@ app_start()
 
 app_install()
 {
+
+    mkdir ~/nodecache && chmod 777 ~/nodecache
+
+    if [ -f "$FILE_PROJECT" ];
+    then
+       app_console npm install
+    else
+       app_create
+    fi
+}
+
+app_create()
+{
     echo -n "Project name ($ProjectName)? "
     read answer
     if [ $answer ]; then
       ProjectName="$answer"
     fi
 
-    mkdir ~/nodecache && chmod 777 ~/nodecache
-
     echo "$ProjectName" > projectname
     echo "$ProjectName"/node_modules >> .gitignore
 
     mkdir $ProjectName && docker-compose -f docker-compose.tasks.yml run --rm --user $(id -u):$(id -g) node ng new $ProjectName
-
 }
 
 app_console()
@@ -43,7 +55,7 @@ app_console()
     docker-compose -f docker-compose.ng.yml run --rm --user $(id -u):$(id -g) node $@
 }
 
-app_node()
+app_ng()
 {
     export ProjectName=$(cat projectname)
     docker-compose -f docker-compose.ng.yml run --rm --user $(id -u):$(id -g) node ng $@
@@ -68,7 +80,7 @@ case "$1" in
     app_console ${@:2}
     ;;
 "ng")
-    app_node ${@:2}
+    app_ng ${@:2}
     ;;
 *)
     echo -e "\n\n\n$ER [APP] No se especifico un comando valido\n"
